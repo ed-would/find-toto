@@ -28,7 +28,13 @@ function resumeAt(h, index) {
 test('Интро сохраняет время до начала игры, показывает 13 прогулок и один открытый уровень', () => {
   const h = createHarness();
   assert.equal(h.getState().phase, 'welcome');
-  assert.equal(h.getState().imageReady, true);
+  assert.equal(h.getState().imageReady, false);
+  assert.equal(h.scene.src, '');
+  assert.equal(h.document.getElementById('level-1').querySelector('img').src, h.config.levels[0].thumbnail);
+  assert.equal(h.document.getElementById('level-1').querySelector('.level-tile-title').textContent, h.config.levels[0].title);
+  assert.equal(h.document.getElementById('level-2').querySelector('img').getAttribute('data-loaded'), null);
+  assert.equal(h.document.getElementById('level-2').querySelector('.level-tile-title').textContent, '');
+  assert.equal(h.document.getElementById('level-2').getAttribute('aria-label'), 'Прогулка 2. Ещё закрыта.');
   assert.equal(h.getState().startedAt, START);
   assert.equal(h.getState().unlockedCount, 1);
   assert.equal(h.document.getElementById('levelGrid').children.length, 13);
@@ -37,7 +43,13 @@ test('Интро сохраняет время до начала игры, по�
   assert.equal(JSON.parse(h.storage.getItem(h.config.storageKey)).startedAt, START);
   h.sleep(5 * 60 * 1000);
   h.document.dispatch('visibilitychange');
+  assert.equal(h.scene.src, '', 'ожидание новой прогулки не скачивает большую сцену');
+  h.sleep(INTERVAL);
+  h.window.dispatch('pageshow');
+  assert.equal(h.document.getElementById('level-2').querySelector('img').src, h.config.levels[1].thumbnail);
+  assert.equal(h.scene.src, '', 'открытая прогулка показывает только превью');
   h.click('startButton');
+  assert.match(h.scene.src, /scene-01\.webp$/);
   assert.equal(h.getState().startedAt, START, 'кнопка старта не переносит начало отсчёта');
   assert.equal(h.getState().phase, 'playing');
   assert.ok(h.getState().elapsedMs < 100, 'время поиска начинается отдельно от расписания');
@@ -286,15 +298,18 @@ test('Клавиатура двигает картинку, показывает
   assert.equal(h.getState().phase, 'celebrating');
 });
 
-test('Сбой загрузки до старта даёт повтор, сохраняет исходное время и возвращает интро', () => {
+test('Сбой загрузки при входе в прогулку даёт повтор и сохраняет исходное время', () => {
   for (const url of [undefined, 'https://example.github.io/find-toto/']) {
     const h = createHarness({ loaded: false, url });
-    assert.equal(h.document.getElementById('startButton').disabled, true);
+    assert.equal(h.scene.src, '');
+    assert.equal(h.document.getElementById('startButton').disabled, false);
+    assert.equal(h.getState().landingVisible, true);
     assert.equal(JSON.parse(h.storage.getItem(h.config.storageKey)).startedAt, START);
+    h.click('startButton');
+    assert.match(h.scene.src, /scene-01\.webp$/);
     h.scene.dispatch('error');
     h.advance(20);
     assert.equal(h.getState().imageError, true);
-    assert.equal(h.document.getElementById('welcomeDialog').open, false);
     assert.equal(h.document.getElementById('loadError').hidden, false);
     h.click('retryImageButton');
     assert.match(h.scene.src, /scene-01\.webp\?retry=/);
@@ -302,23 +317,25 @@ test('Сбой загрузки до старта даёт повтор, сох�
     else assert.match(h.scene.src, /^file:/);
     h.completeImage();
     assert.equal(h.getState().imageError, false);
-    assert.equal(h.document.getElementById('welcomeDialog').open, true);
     assert.equal(h.getState().startedAt, START);
-    h.click('startButton');
     assert.equal(h.getState().phase, 'playing');
   }
 });
 
-test('Ошибка изображения, уже завершившего загрузку до запуска скрипта, сразу показывает доступный повтор', () => {
+test('Битый кэш сцены всплывает при входе в прогулку и даёт повтор', () => {
   const h = createHarness({ loaded: false, cachedFailure: true });
+  assert.equal(h.getState().imageError, false);
+  assert.equal(h.scene.src, '');
+  assert.equal(h.getState().landingVisible, true);
+  h.click('startButton');
   assert.equal(h.getState().imageError, true);
   assert.equal(h.document.getElementById('loadError').hidden, false);
-  assert.equal(h.document.getElementById('welcomeDialog').open, false);
+  assert.equal(h.getState().landingVisible, false);
   assert.equal(h.getState().startedAt, START);
   h.click('retryImageButton');
   h.completeImage();
   assert.equal(h.getState().imageReady, true);
-  assert.equal(h.document.getElementById('welcomeDialog').open, true);
+  assert.equal(h.getState().phase, 'playing');
 });
 
 test('Если следующая сцена не загрузилась, повтор восстанавливает выбранный уровень и его правильную цель', () => {
@@ -412,15 +429,15 @@ test('Preview открывает все сцены и тестовые откр�
   assert.equal(ignored.getState().unlockedCount, 1);
 });
 
-test('Логотип открывает маршрут без перезагрузки и сохраняет preview даже при открытии ссылки в новой вкладке', () => {
+test('Логотип возвращает на лендинг без перезагрузки и сохраняет preview даже при открытии ссылки в новой вкладке', () => {
   const h = createHarness({ url: 'https://example.github.io/toto/?preview=1' });
   h.click('startButton');
   const brand = h.document.querySelector('.brand');
-  assert.match(brand.getAttribute('href'), /\?preview=1$/);
+  assert.match(brand.getAttribute('href'), /\?preview=1#welcomeDialog$/);
   const event = brand.dispatch('click', { button: 0 });
   h.advance(20);
   assert.equal(event.defaultPrevented, true);
-  assert.equal(h.document.getElementById('welcomeDialog').open, true);
+  assert.equal(h.getState().landingVisible, true);
   assert.equal(h.getState().preview, true);
   assert.equal(h.getStorageReads(), 0);
   const modifiedClick = brand.dispatch('click', { button: 0, ctrlKey: true });
@@ -450,7 +467,7 @@ test('Большое поздравление следует за последн
   assert.equal(h.getState().finalOpen, true);
   assert.equal(h.document.getElementById('victoryDialog').open, false);
   h.click('finalReplayButton');
-  assert.equal(h.document.getElementById('welcomeDialog').open, true);
+  assert.equal(h.getState().landingVisible, true);
   assert.equal(h.document.getElementById('hubFinalButton').hidden, false);
   h.click('level-13');
   findToto(h);

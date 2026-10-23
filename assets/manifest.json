@@ -18,11 +18,11 @@
       "sha256": "118f5ff64019a224068ebd353e36da73fb036e08124291d1edb7824e900d9542"
     },
     {
-      "path": "assets/cards/card-02.webp",
-      "width": 3840,
-      "height": 2560,
-      "bytes": 2754390,
-      "sha256": "1349f7594de0dea086b1b0f55b86b3397289caaed858a14ea5cd881296d420c1"
+      "path": "assets/cards/card-02.png",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 3327427,
+      "sha256": "db1aaf6dea74adfaedf59d658373f9c1dea088ece5c9e88b5729ef60304e2165"
     },
     {
       "path": "assets/cards/card-03.webp",
@@ -109,18 +109,18 @@
       "sha256": "1762decc3ace2aff65aeeb6d15ed5e49172b1b07d8e3a2bc38125b38c63e22ad"
     },
     {
-      "path": "assets/intro.webp",
-      "width": 960,
-      "height": 640,
-      "bytes": 263880,
-      "sha256": "2a7c69a9869b902ab5ed0ad7b5fbade32e87c90a8b05acb9a32798d1e2677fba"
+      "path": "assets/cards/intro.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 867264,
+      "sha256": "c5497f0fd5d17c046ce173c4ef443adb7d5312086df9d11ce32db1783a77c963"
     },
     {
       "path": "assets/portrait.webp",
-      "width": 320,
-      "height": 320,
-      "bytes": 52046,
-      "sha256": "6d6856c4be51eb1ec8e3633cc347ab2780fca188d5f844119c10369bbd8c7481"
+      "width": 196,
+      "height": 196,
+      "bytes": 13060,
+      "sha256": "e6a75d4b8a23ae517047e5c9d288adec1371c29bbdec6c0c76a6c28b6a4aa90d"
     },
     {
       "path": "assets/scenes/scene-01.webp",

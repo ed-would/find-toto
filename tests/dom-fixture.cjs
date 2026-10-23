@@ -27,6 +27,23 @@ class Events {
   }
 }
 
+class TextNode {
+  constructor(text, document) {
+    this.ownerDocument = document;
+    this.parentNode = null;
+    this._text = String(text);
+    this.children = [];
+  }
+  get textContent() { return this._text; }
+  set textContent(value) { this._text = String(value); }
+  matches() { return false; }
+  remove() {
+    if (!this.parentNode) return;
+    this.parentNode.children = this.parentNode.children.filter(child => child !== this);
+    this.parentNode = null;
+  }
+}
+
 class Element extends Events {
   constructor(tagName, document) {
     super();
@@ -170,6 +187,7 @@ function parseDocument(html) {
   document.hidden = false;
   document.baseURI = pathToFileURL(path.join(ROOT, 'index.html')).href;
   document.createElement = tag => new Element(tag, document);
+  document.createTextNode = text => new TextNode(text, document);
   document.getElementById = id => {
     const element = document.ids.get(id);
     return element && element.isConnected ? element : null;

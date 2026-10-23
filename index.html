@@ -8,7 +8,6 @@
   <title>Найди Тото — 13 чудес для Рины ♡</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
-  <link rel="preload" href="assets/scenes/scene-01.webp" as="image" fetchpriority="high">
   <script src="config.js" defer></script>
   <script src="progress.js" defer></script>
   <script src="game.js" defer></script>
@@ -35,8 +34,8 @@
 
   <div class="app-shell">
     <header class="masthead">
-      <a class="brand" href="./index.html" aria-label="Найди Тото, главная"><span class="brand-mark"><svg class="icon"><use href="#i-paw"/></svg></span><span>маленькие <i>чудеса</i></span></a>
-      <span class="occasion"><span class="occasion-dot"></span> 24 октября <span class="occasion-divider">/</span> С днём рождения, Рина!</span>
+      <a class="brand" href="./index.html#welcomeDialog" aria-label="Найди Тото, главная"><span class="brand-mark"><svg class="icon"><use href="#i-paw"/></svg></span><span class="brand-lockup"><span class="brand-find">Найди</span><span class="brand-name">Тото</span><svg class="brand-spark" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="m12 1.4 1.55 6.55L20.6 12l-7.05 2.05L12 22.6l-1.55-8.55L4.4 12l7.05-4.05Z"/></svg></span></a>
+      <p class="occasion"><span class="occasion-sky" aria-hidden="true"><i class="spark spark-a"></i><i class="spark spark-b"></i><i class="spark spark-c"></i><i class="spark spark-d"></i><i class="spark spark-e"></i><i class="spark spark-f"></i><i class="burst burst-a"></i><i class="burst burst-b"></i><i class="burst burst-c"></i></span><span class="occasion-wish">С днём рождения, Рина!</span></p>
       <div class="header-actions">
         <button id="journeyButton" class="button journey-button" type="button"><svg class="icon"><use href="#i-paw"/></svg><span>Наш маршрут</span></button>
         <button id="soundButton" class="icon-button sound-button" type="button" aria-label="Включить звуки" aria-pressed="false" title="Звуки выключены"><svg class="icon"><use href="#i-sound"/></svg><span class="sound-slash" aria-hidden="true"></span></button>
@@ -47,15 +46,36 @@
     <div id="previewBadge" class="preview-badge" hidden>Просмотр подарка · все остановки открыты · обычный прогресс не меняется <button id="previewCardButton" class="text-button" type="button" hidden>Проверить открытку этого уровня</button></div>
     <p id="saveNotice" class="save-notice" role="status" hidden>Браузер не разрешил сохранить путешествие. Пока эта вкладка открыта, игра работает; после закрытия прогресс может потеряться.</p>
 
-    <main class="game-layout">
-      <aside class="story-panel" aria-label="Задание и подсказки">
-        <div class="story-heading">
-          <p class="eyebrow">Для моей любимой Рины</p>
-          <h1>Найди<br><em>Тото</em><span class="title-sparkle" aria-hidden="true">✦</span></h1>
-          <p class="story-description">Тринадцать маленьких путешествий.<br>Один очень любимый мопс.<br>И целый день сюрпризов.</p>
+    <section id="welcomeDialog" class="welcome-landing journey-dialog" aria-labelledby="welcomeTitle" aria-describedby="welcomeDescription">
+      <div class="journey-hero">
+        <div class="journey-intro">
+          <p class="eyebrow"><span class="date-mark">24 октября</span> <svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg> <span class="eyebrow-love">с Любовью для Пушинчика</span></p>
+          <h2 id="welcomeTitle">Один <span class="title-toto">мопс</span><br>Тринадцать <em class="title-miracle">чудес</em></h2>
+          <p id="welcomeDescription">Рина, Тото приготовил тебе целый день маленьких путешествий. В каждом новом месте он прячется, а когда ты его находишь — дарит открытку.</p>
+          <p class="journey-rules">Первая остановка уже открыта. Следующие появляются <strong>каждые 30 минут</strong>. Можно уйти по своим делам, вернуться позже и пройти все открывшиеся места подряд.</p>
+          <button id="startButton" type="button" class="button button-primary welcome-start" autofocus>Иду искать! <svg class="icon"><use href="#i-arrow"/></svg></button>
+          <p class="welcome-footnote">Уютной прогулки, Любимочка ♡ ♡ ♡</p>
         </div>
+        <div class="journey-illustration"><img src="assets/cards/intro.webp" alt="Тото с чемоданом и картой сидит у открытой калитки осеннего сада." width="1536" height="1024"><span class="journey-art-stamp toto-stamp" aria-hidden="true"><svg viewBox="0 0 100 100" role="img" aria-label="особенная доставка от Тото"><circle class="toto-stamp-ring" cx="50" cy="50" r="46"/><circle class="toto-stamp-ring toto-stamp-ring-inner" cx="50" cy="50" r="24.5"/><text class="toto-stamp-text"><textPath path="M 18.74 33.38 A 35.4 35.4 0 0 1 81.26 33.38" startOffset="50%" text-anchor="middle">особенная</textPath></text><text class="toto-stamp-text toto-stamp-line-2"><textPath path="M 24.75 36.57 A 28.6 28.6 0 0 1 75.25 36.57" startOffset="50%" text-anchor="middle">доставка</textPath></text><text class="toto-stamp-text toto-stamp-text-bottom"><textPath path="M 15.92 68.12 A 38.6 38.6 0 0 0 84.08 68.12" startOffset="50%" text-anchor="middle">от Тото</textPath></text><use class="toto-stamp-mark" href="#i-paw" width="26" height="26" x="37" y="37"/></svg></span></div>
+      </div>
+      <section class="journey-schedule" aria-label="Расписание путешествия">
+        <div class="next-surprise"><svg class="icon"><use href="#i-clock"/></svg><div><p id="welcomeCountdownLabel">До следующей остановки</p><strong id="welcomeCountdown">30:00</strong></div></div>
+        <div class="journey-progress"><strong id="welcomeProgress">0 из 13 открыток</strong><p>Каждая находка — ещё один привет от Тото</p></div>
+        <div class="journey-times"><span>Начали: <b id="journeyStartTime">сегодня</b></span><span>Все места откроются: <b id="journeyEndTime">через 6 часов</b></span></div>
+      </section>
+      <section class="journey-route" aria-labelledby="routeTitle">
+        <h1 class="story-title">Тринадцать маленьких путешествий.<br>Один очень любимый мопс.<br>И целый день сюрпризов.</h1>
+        <div class="route-heading"><div><p class="eyebrow">Наш маршрут</p><h3 id="routeTitle">Куда спрятался Тото?</h3></div><span>Открытые места можно проходить в любом порядке</span></div>
+        <div id="levelGrid" class="level-grid"></div>
+        <button id="hubFinalButton" class="button button-primary hub-final-button" type="button" hidden>Открыть главное письмо <svg class="icon"><use href="#i-heart"/></svg></button>
+        <p class="journey-bottom-note">Отсчёт идёт с первого визита в этом браузере и продолжается, даже если закрыть вкладку. Найденные открытки сохраняются. После открытия всех мест путешествие остаётся с тобой ♡</p>
+      </section>
+    </section>
+
+    <main class="game-layout" id="gameLayout">
+      <aside class="story-panel" aria-label="Задание и подсказки">
         <div class="wanted-card">
-          <div class="toto-portrait" aria-hidden="true"><img src="assets/portrait.webp" alt="" width="320" height="320" draggable="false"></div>
+          <div class="toto-portrait" aria-hidden="true"><img src="assets/portrait.webp" alt="" width="196" height="196" draggable="false"></div>
           <div class="wanted-copy"><span class="tiny-label">Ищем вот этого хитрюгу</span><h2>Тото <span aria-hidden="true">♡</span></h2><p>Седая мордочка, тёмные ушки<br>и талант прятаться на виду.</p></div><span class="portrait-star" aria-hidden="true">✧</span>
         </div>
         <div class="mission-note"><span id="levelNumber" class="note-number">01</span><div><p id="levelTitle" class="mission-title">Городок маленьких чудес</p><p id="levelSubtitle" class="mission-subtitle">Осень · начало путешествия</p><p id="levelDescription">Приближай картинку, заглядывай в уголки и нажми на Тото, когда найдёшь.</p></div></div>
@@ -74,7 +94,7 @@
         <div id="sceneShell" class="scene-shell">
           <div id="viewport" class="viewport" tabindex="0" role="region" aria-label="Игровая картинка. Найди Тото. Масштаб: плюс и минус, перемещение: стрелки, проверить центр: пробел или Enter." aria-describedby="mapInstructions">
             <div id="world" class="world">
-              <img id="sceneImage" class="scene-image" src="assets/scenes/scene-01.webp" alt="Подробная иллюстрация уютного осеннего городка: канал, мостики, книжные и цветочные лавки, трамвайчик и жители со своими маленькими историями. Где-то прячется Тото." draggable="false" fetchpriority="high">
+              <img id="sceneImage" class="scene-image" alt="" draggable="false" decoding="async">
               <div id="hintArea" class="hint-area" hidden aria-hidden="true"></div>
               <div id="hintPin" class="hint-pin" hidden aria-hidden="true"><span>Тото ♡</span></div>
             </div>
@@ -103,32 +123,6 @@
     <footer class="page-footer"><span>Сделано из любви и немножко мопсовой магии</span><span class="secret-number" title="Наш маленький символ">13<span>♡</span>23</span><span>Никуда не спешим. Это твой день.</span></footer>
   </div>
 
-  <dialog id="welcomeDialog" class="dialog welcome-dialog journey-dialog" aria-labelledby="welcomeTitle" aria-describedby="welcomeDescription">
-    <button id="journeyClose" class="icon-button dialog-close" type="button" aria-label="Вернуться к поискам" hidden><svg class="icon"><use href="#i-close"/></svg></button>
-    <div class="journey-hero">
-      <div class="journey-intro">
-        <p class="eyebrow">24 октября · с любовью для Рины</p>
-        <h2 id="welcomeTitle">Один мопс.<br>Тринадцать <em>чудес.</em></h2>
-        <p id="welcomeDescription">Рина, Тото приготовил тебе целый день маленьких путешествий. В каждом новом месте он прячется, а когда ты его находишь — дарит открытку.</p>
-        <p class="journey-rules">Первая остановка уже открыта. Следующие появляются <strong>каждые 30 минут</strong>. Можно уйти по своим делам, вернуться позже и пройти все открывшиеся места подряд.</p>
-        <button id="startButton" type="button" class="button button-primary welcome-start" autofocus>Иду искать! <svg class="icon"><use href="#i-arrow"/></svg></button>
-        <p class="welcome-footnote">Уютной прогулки, Любимочка ♡ ♡ ♡</p>
-      </div>
-      <div class="journey-illustration"><img src="assets/intro.webp" alt="Тото в цветочной корзине воздушного шара везёт Рине письмо с сердечком." width="900" height="600"><span class="journey-art-stamp">особенная доставка<br><svg class="icon"><use href="#i-paw"/></svg><br>от Тото</span></div>
-    </div>
-    <section class="journey-schedule" aria-label="Расписание путешествия">
-      <div class="next-surprise"><svg class="icon"><use href="#i-clock"/></svg><div><p id="welcomeCountdownLabel">До следующей остановки</p><strong id="welcomeCountdown">30:00</strong></div></div>
-      <div class="journey-progress"><strong id="welcomeProgress">0 из 13 открыток</strong><p>Каждая находка — ещё один привет от Тото</p></div>
-      <div class="journey-times"><span>Начали: <b id="journeyStartTime">сегодня</b></span><span>Все места откроются: <b id="journeyEndTime">через 6 часов</b></span></div>
-    </section>
-    <section class="journey-route" aria-labelledby="routeTitle">
-      <div class="route-heading"><div><p class="eyebrow">Наш маршрут</p><h3 id="routeTitle">Куда спрятался Тото?</h3></div><span>Открытые места можно проходить в любом порядке</span></div>
-      <div id="levelGrid" class="level-grid"></div>
-      <button id="hubFinalButton" class="button button-primary hub-final-button" type="button" hidden>Открыть главное письмо <svg class="icon"><use href="#i-heart"/></svg></button>
-      <p class="journey-bottom-note">Отсчёт идёт с первого визита в этом браузере и продолжается, даже если закрыть вкладку. Найденные открытки сохраняются. После открытия всех мест путешествие остаётся с тобой ♡</p>
-    </section>
-  </dialog>
-
   <dialog id="helpDialog" class="dialog help-dialog" aria-labelledby="helpTitle">
     <button id="helpClose" class="icon-button dialog-close" type="button" aria-label="Закрыть правила"><svg class="icon"><use href="#i-close"/></svg></button>
     <p class="eyebrow">Маленькая инструкция</p><h2 id="helpTitle">Как найти <em>Тото?</em></h2>
@@ -146,7 +140,7 @@
   <dialog id="victoryDialog" class="victory-dialog chapter-dialog" aria-labelledby="victoryTitle" aria-describedby="cardText">
     <button id="victoryClose" class="icon-button victory-close" type="button" aria-label="Вернуться к картинке"><svg class="icon"><use href="#i-close"/></svg></button>
     <div class="birthday-card">
-      <div class="birthday-art"><img id="cardImage" src="assets/cards/card-01.webp" alt="Тото приготовил открытку." loading="lazy"><span class="birthday-stamp"><span>особенная доставка</span><svg class="icon"><use href="#i-paw"/></svg><span>от всего сердца</span></span></div>
+      <div class="birthday-art"><img id="cardImage" alt="Тото приготовил открытку." decoding="async"><span class="birthday-stamp toto-stamp" aria-hidden="true"><svg viewBox="0 0 100 100" role="img" aria-label="особенная доставка от всего сердца"><circle class="toto-stamp-ring" cx="50" cy="50" r="46"/><circle class="toto-stamp-ring toto-stamp-ring-inner" cx="50" cy="50" r="24.5"/><text class="toto-stamp-text"><textPath path="M 18.74 33.38 A 35.4 35.4 0 0 1 81.26 33.38" startOffset="50%" text-anchor="middle">особенная</textPath></text><text class="toto-stamp-text toto-stamp-line-2"><textPath path="M 24.75 36.57 A 28.6 28.6 0 0 1 75.25 36.57" startOffset="50%" text-anchor="middle">доставка</textPath></text><text class="toto-stamp-text toto-stamp-text-bottom toto-stamp-text-compact"><textPath path="M 13.65 64.68 A 39.2 39.2 0 0 0 86.35 64.68" startOffset="50%" text-anchor="middle">от всего сердца</textPath></text><use class="toto-stamp-mark" href="#i-paw" width="26" height="26" x="37" y="37"/></svg></span></div>
       <section class="birthday-letter">
         <p id="victoryTitle" class="victory-eyebrow"><svg class="icon"><use href="#i-star"/></svg> Рина, ты нашла Тото!</p>
         <p id="cardLocation" class="birthday-date">Письмо 01 из 13</p>
@@ -168,10 +162,10 @@
   <dialog id="finalDialog" class="victory-dialog final-dialog" aria-labelledby="finalTitle" aria-describedby="birthdayMessage">
     <button id="finalClose" class="icon-button victory-close" type="button" aria-label="Закрыть главное письмо"><svg class="icon"><use href="#i-close"/></svg></button>
     <div class="birthday-card">
-      <div class="birthday-art"><img id="finalImage" src="assets/cards/final.webp" alt="Тото дома, среди открыток из путешествия, протягивает самое важное письмо с сердечком." loading="lazy"><span class="birthday-stamp"><span>тринадцать чудес</span><svg class="icon"><use href="#i-heart"/></svg><span>и одна большая любовь</span></span></div>
+      <div class="birthday-art"><img id="finalImage" alt="Тото дома, среди открыток из путешествия, протягивает самое важное письмо с сердечком." decoding="async"><span class="birthday-stamp toto-stamp" aria-hidden="true"><svg viewBox="0 0 100 100" role="img" aria-label="тринадцать чудес и одна большая любовь"><circle class="toto-stamp-ring" cx="50" cy="50" r="46"/><circle class="toto-stamp-ring toto-stamp-ring-inner" cx="50" cy="50" r="24.5"/><text class="toto-stamp-text"><textPath path="M 18.74 33.38 A 35.4 35.4 0 0 1 81.26 33.38" startOffset="50%" text-anchor="middle">тринадцать</textPath></text><text class="toto-stamp-text toto-stamp-line-2"><textPath path="M 24.75 36.57 A 28.6 28.6 0 0 1 75.25 36.57" startOffset="50%" text-anchor="middle">чудес</textPath></text><text class="toto-stamp-text toto-stamp-text-bottom toto-stamp-text-compact"><textPath path="M 13.65 64.68 A 39.2 39.2 0 0 0 86.35 64.68" startOffset="50%" text-anchor="middle">и одна большая любовь</textPath></text><use class="toto-stamp-mark" href="#i-heart" width="18" height="18" x="41" y="41"/></svg></span></div>
       <section class="birthday-letter final-letter">
         <p class="victory-eyebrow"><svg class="icon"><use href="#i-star"/></svg> Все 13 заданий Тото выполнены!</p>
-        <p class="birthday-date">24 октября · для тебя, Рина</p>
+        <p class="birthday-date"><span class="date-mark">24 октября</span> · для тебя, Рина</p>
         <h2 id="finalTitle">С днём<br>рождения,<br><em>Любимочка.</em></h2>
         <div class="letter-ornament" aria-hidden="true"><span></span>♡<span></span></div>
         <div id="birthdayMessage" class="birthday-message">

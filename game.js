@@ -94,7 +94,7 @@
       "helpClose", "victoryDialog", "replayButton", "victoryTime",
       "victoryHints", "victoryClose", "openCardButton", "fullscreenButton",
       "loadingState", "loadError", "retryImageButton", "sceneShell",
-      "levelGrid", "journeyClose", "welcomeCountdown", "welcomeCountdownLabel",
+      "levelGrid", "welcomeCountdown", "welcomeCountdownLabel",
       "welcomeProgress", "journeyStartTime", "journeyEndTime", "journeyButton",
       "journeyCountdown", "progressLabel", "levelTitle", "levelSubtitle", "levelNumber",
       "levelDescription", "worldTitle", "mapHintButton", "mapHintMessage", "keyboardCursor",
@@ -161,6 +161,8 @@
     var pointers = new Map();
     var gesture = null;
     var renderFrame = 0;
+    var viewportOrigin = null;
+    var lastZoomPercent = "";
     var motionFrame = 0;
     var confettiFrame = 0;
     var confettiStopTimeout = 0;
@@ -179,7 +181,7 @@
       nextSibling: ui.confettiCanvas.nextSibling
     } : null;
     var dialogReturnFocus = new Map();
-    var dialogs = [ui.welcomeDialog, ui.helpDialog, ui.victoryDialog, ui.finalDialog].filter(Boolean);
+    var dialogs = [ui.helpDialog, ui.victoryDialog, ui.finalDialog].filter(Boolean);
 
     function visible(element, show) {
       if (element) element.hidden = !show;
@@ -226,17 +228,28 @@
         button.className = "level-tile";
         button.setAttribute("id", "level-" + level.id);
         button.setAttribute("data-level", String(level.id));
-        if (level.thumbnail) {
-          var thumbnail = document.createElement("img");
-          thumbnail.className = "level-thumb";
-          thumbnail.alt = "";
-          thumbnail.loading = "lazy";
-          thumbnail.decoding = "async";
-          thumbnail.width = 512;
-          thumbnail.height = 341;
+        var thumbnail = document.createElement("img");
+        thumbnail.className = "level-thumb";
+        thumbnail.alt = "";
+        thumbnail.decoding = "async";
+        thumbnail.width = 512;
+        thumbnail.height = 341;
+        var openedNow = index < journey.unlockedCount;
+        if (!openedNow) button.classList.add("is-locked");
+        if (level.thumbnail && openedNow) {
           thumbnail.src = level.thumbnail;
-          button.appendChild(thumbnail);
+          thumbnail.setAttribute("data-loaded", level.thumbnail);
+        } else if (!openedNow) {
+          thumbnail.src = "data:image/svg+xml," + encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2" aria-hidden="true"></svg>'
+          );
         }
+        button.appendChild(thumbnail);
+        var secret = document.createElement("span");
+        secret.className = "level-secret";
+        secret.setAttribute("aria-hidden", "true");
+        secret.innerHTML = '<img class="pug-mark" src="assets/placeholder-toto.webp" alt="" width="1254" height="1254" draggable="false" decoding="async">';
+        button.appendChild(secret);
         var copy = document.createElement("span");
         copy.className = "level-copy";
         var numberLabel = document.createElement("span");
@@ -244,7 +257,7 @@
         numberLabel.textContent = "Прогулка " + (index + 1);
         var title = document.createElement("strong");
         title.className = "level-tile-title";
-        title.textContent = level.title || "Сюрприз Тото";
+        title.textContent = openedNow ? (level.title || "Сюрприз Тото") : "";
         var label = document.createElement("span");
         label.className = "level-state";
         copy.appendChild(numberLabel);
@@ -253,8 +266,18 @@
         button.appendChild(copy);
         listen(button, "click", function () { loadLevel(index, true); });
         ui.levelGrid.appendChild(button);
-        levelTiles.push({ button: button, label: label });
+        levelTiles.push({ button: button, label: label, title: title, thumb: thumbnail });
       });
+    }
+
+    function writeOpenCount(node, before, count, after) {
+      var mark = document.createElement("span");
+      mark.className = "open-count";
+      mark.textContent = String(count);
+      node.textContent = "";
+      if (before) node.appendChild(document.createTextNode(before));
+      node.appendChild(mark);
+      if (after) node.appendChild(document.createTextNode(after));
     }
 
     function refreshJourney(announceUnlock) {
@@ -264,9 +287,12 @@
       var allOpen = journey.unlockedCount === levels.length;
       var count = journey.completed.length + " / " + levels.length;
       if (ui.progressLabel) ui.progressLabel.textContent = "Тото найден: " + count;
-      if (ui.welcomeProgress) ui.welcomeProgress.textContent = "Открыто " + journey.unlockedCount +
-        " из " + levels.length + " прогулок · Тото найден: " + count;
-      if (ui.welcomeCountdown) ui.welcomeCountdown.textContent = allOpen ? "Все " + levels.length + "!" : wait;
+      if (ui.welcomeProgress) writeOpenCount(ui.welcomeProgress, "Открыто ", journey.unlockedCount,
+        " из " + levels.length + " прогулок · Тото найден: " + count);
+      if (ui.welcomeCountdown) {
+        if (allOpen) writeOpenCount(ui.welcomeCountdown, "Все ", levels.length, "!");
+        else ui.welcomeCountdown.textContent = wait;
+      }
       if (ui.welcomeCountdownLabel) ui.welcomeCountdownLabel.textContent = allOpen
         ? "Все прогулки уже открыты" : "Следующая прогулка через";
       if (ui.journeyCountdown) ui.journeyCountdown.textContent = allOpen
@@ -275,7 +301,6 @@
       if (ui.journeyEndTime) ui.journeyEndTime.textContent = displayTime(journey.finalUnlockAt);
       if (ui.cardProgress) ui.cardProgress.textContent = "Тото найден в " + journey.completed.length +
         " из " + levels.length + " прогулок";
-      visible(ui.journeyClose, state.started);
       visible(ui.finalButton, journey.allCompleted);
       visible(ui.hubFinalButton, journey.allCompleted || preview);
       visible(ui.saveNotice, !preview && !journey.persistent);
@@ -292,16 +317,38 @@
         tile.button.classList[state.started && index === state.levelIndex ? "add" : "remove"]("is-current");
         if (state.started && index === state.levelIndex) tile.button.setAttribute("aria-current", "true");
         else tile.button.removeAttribute("aria-current");
-        var remaining = Math.max(0, journey.startedAt + index * number(config.unlockIntervalMs, 1800000) - journey.lastSeenAt);
-        tile.label.textContent = !opened ? "Откроется через " + math.formatElapsed(Math.ceil(remaining / 1000) * 1000)
-          : completed ? "Тото найден ♡ · можно ещё раз" : "Искать Тото";
-        tile.button.setAttribute("aria-label", "Прогулка " + (index + 1) + ". " +
-          levels[index].title + ". " + tile.label.textContent);
+        tile.label.textContent = !opened ? ""
+          : completed ? "Тото найден · можно ещё раз" : "Искать Тото";
+        if (tile.title) tile.title.textContent = opened ? (levels[index].title || "Сюрприз Тото") : "";
+        tile.button.setAttribute("aria-label", opened
+          ? "Прогулка " + (index + 1) + ". " + levels[index].title + ". " + tile.label.textContent
+          : "Прогулка " + (index + 1) + ". Ещё закрыта.");
+        if (opened && tile.thumb && levels[index].thumbnail &&
+            tile.thumb.getAttribute("data-loaded") !== levels[index].thumbnail) {
+          tile.thumb.src = levels[index].thumbnail;
+          tile.thumb.setAttribute("data-loaded", levels[index].thumbnail);
+        }
       });
       if (announceUnlock && journey.unlockedCount > before) {
         announce("Тото открыл новые прогулки! Теперь доступны " + journey.unlockedCount +
           " из " + levels.length + ". Их можно выбрать в меню прогулок.");
       }
+    }
+
+    function setTextWithDate(node, text) {
+      var date = "24 октября";
+      var at = text.indexOf(date);
+      node.textContent = "";
+      if (at < 0) {
+        node.textContent = text;
+        return;
+      }
+      if (at > 0) node.appendChild(document.createTextNode(text.slice(0, at)));
+      var mark = document.createElement("span");
+      mark.className = "date-mark";
+      mark.textContent = date;
+      node.appendChild(mark);
+      if (at + date.length < text.length) node.appendChild(document.createTextNode(text.slice(at + date.length)));
     }
 
     function loadLevel(index, begin) {
@@ -322,6 +369,7 @@
       state.error = false;
       state.pendingStart = Boolean(begin);
       if (begin) {
+        enterGameView();
         state.started = true;
         state.phase = "loading";
         dialogs.forEach(closeDialog);
@@ -356,25 +404,27 @@
       visible(ui.openCardButton, false);
       visible(ui.loadError, false);
       visible(ui.retryImageButton, false);
-      visible(ui.loadingState, true);
-      if (ui.loadingState) ui.loadingState.dataset.state = "loading";
+      visible(ui.loadingState, Boolean(begin));
+      if (ui.loadingState) ui.loadingState.dataset.state = begin ? "loading" : "";
       if (ui.levelTitle) ui.levelTitle.textContent = level.title || "Прогулка с Тото";
-      if (ui.levelSubtitle) ui.levelSubtitle.textContent = level.subtitle || "";
+      if (ui.levelSubtitle) setTextWithDate(ui.levelSubtitle, level.subtitle || "");
       if (ui.levelNumber) ui.levelNumber.textContent = String(index + 1).padStart(2, "0") + " / " + levels.length;
       if (ui.levelDescription) ui.levelDescription.textContent = level.description || "";
       if (ui.worldTitle) ui.worldTitle.textContent = level.title || "Мир Тото";
+      ui.sceneImage.alt = level.scene && level.scene.alt || "Большая подробная иллюстрация: " + level.title;
+      initialImageSource = level.scene && level.scene.src || "";
+      updateButtons();
+      refreshJourney(false);
+      syncClock();
+      // Full scene bytes stay unloaded until this quest is entered.
+      if (!begin) return true;
       ui.world.style.width = scene.width + "px";
       ui.world.style.height = scene.height + "px";
       ui.sceneImage.width = scene.width;
       ui.sceneImage.height = scene.height;
-      ui.sceneImage.alt = level.scene && level.scene.alt || "Большая подробная иллюстрация: " + level.title;
-      initialImageSource = level.scene && level.scene.src || "";
-      ui.sceneImage.src = initialImageSource;
-      updateButtons();
-      refreshJourney(false);
       resizeScene();
-      syncClock();
-      // Cached images may already be complete and do not need a second network request.
+      if (ui.sceneImage.fetchPriority !== undefined) ui.sceneImage.fetchPriority = "high";
+      ui.sceneImage.src = initialImageSource;
       if (ui.sceneImage.complete) {
         if (ui.sceneImage.naturalWidth > 0) markImageReady();
         else markImageError();
@@ -382,20 +432,37 @@
       return true;
     }
 
-    function showJourney() {
-      refreshJourney(false);
-      exitFullscreenView(function () { showDialog(ui.welcomeDialog, ui.startButton); });
+    function landingIsVisible() {
+      return !document.body.classList.contains("game-active");
+    }
+
+    function goToLanding() {
+      exitFullscreenView(function () {
+        document.body.classList.remove("game-active", "route-panel-open");
+        refreshJourney(false);
+        syncClock();
+        if (ui.welcomeDialog && typeof ui.welcomeDialog.scrollIntoView === "function") {
+          ui.welcomeDialog.scrollIntoView({
+            behavior: state.reducedMotion ? "auto" : "smooth",
+            block: "start"
+          });
+        }
+      });
+    }
+
+    function enterGameView() {
+      document.body.classList.add("game-active");
     }
 
     function continueJourney() {
       refreshJourney(false);
       if (state.started && state.ready && state.phase === "playing") {
-        closeDialog(ui.welcomeDialog);
         syncClock();
         focusSafely(ui.viewport);
         return;
       }
       var index = nextIncomplete(-1);
+      if (!state.started) enterGameView();
       loadLevel(index === -1 ? state.levelIndex : index, true);
     }
 
@@ -501,13 +568,10 @@
     dialogs.forEach(function (dialog) {
       if (!dialog.hasAttribute("tabindex")) dialog.setAttribute("tabindex", "-1");
       listen(dialog, "close", function () { afterDialogClose(dialog); });
-      listen(dialog, "cancel", function (event) {
-        if (dialog === ui.welcomeDialog && !state.started) event.preventDefault();
-      });
       listen(dialog, "keydown", function (event) {
         if (event.key === "Escape" && typeof dialog.close !== "function") {
           event.preventDefault();
-          if (dialog !== ui.welcomeDialog || state.started) closeDialog(dialog);
+          closeDialog(dialog);
         }
         if (event.key !== "Tab") return;
         var elements = focusableElements(dialog);
@@ -536,11 +600,21 @@
       };
     }
 
-    function localPoint(event) {
+    function rememberViewportOrigin() {
       var rectangle = ui.viewport.getBoundingClientRect();
+      viewportOrigin = {
+        left: rectangle.left + ui.viewport.clientLeft,
+        top: rectangle.top + ui.viewport.clientTop
+      };
+    }
+
+    function localPoint(event) {
+      // While a drag is active the viewport does not move, so reuse the origin.
+      // Reading layout on every pointermove was forcing style recalculation.
+      if (!pointers.size || !viewportOrigin) rememberViewportOrigin();
       return {
-        x: event.clientX - rectangle.left - ui.viewport.clientLeft,
-        y: event.clientY - rectangle.top - ui.viewport.clientTop
+        x: event.clientX - viewportOrigin.left,
+        y: event.clientY - viewportOrigin.top
       };
     }
 
@@ -554,7 +628,7 @@
 
     function updateButtons() {
       var playable = state.ready && state.phase === "playing";
-      if (ui.startButton) ui.startButton.disabled = !state.ready;
+      if (ui.startButton) ui.startButton.disabled = state.phase === "loading";
       if (ui.zoomIn) ui.zoomIn.disabled = !state.ready ||
         state.transform.scale >= state.fit * maxZoom - 0.000001;
       if (ui.zoomOut) ui.zoomOut.disabled = !state.ready ||
@@ -579,14 +653,22 @@
       var transform = state.transform;
       ui.world.style.transform = "translate3d(" + transform.x + "px," +
         transform.y + "px,0) scale(" + transform.scale + ")";
-      ui.viewport.style.setProperty("--map-scale", String(transform.scale));
       if (ui.hintArea && !ui.hintArea.hidden) {
         ui.hintArea.style.borderWidth = Math.max(1, 1.35 / transform.scale) + "px";
       }
       if (ui.hintPin && !ui.hintPin.hidden) {
         ui.hintPin.style.transform = "translate(-50%,-50%) scale(" + (1 / transform.scale) + ")";
       }
-      updateButtons();
+      var percent = state.fit > 0
+        ? Math.round(transform.scale / state.fit * 100) + "%"
+        : "";
+      if (percent === lastZoomPercent) return;
+      lastZoomPercent = percent;
+      if (ui.zoomLabel) ui.zoomLabel.textContent = percent;
+      if (ui.zoomIn) ui.zoomIn.disabled = !state.ready ||
+        transform.scale >= state.fit * maxZoom - 0.000001;
+      if (ui.zoomOut) ui.zoomOut.disabled = !state.ready ||
+        transform.scale <= state.fit + 0.000001;
     }
 
     function scheduleRender() {
@@ -683,6 +765,7 @@
     }
 
     function resizeScene() {
+      viewportOrigin = null;
       var measured = measureViewport();
       if (!(measured.width > 0 && measured.height > 0)) return;
       if (measured.width === state.viewport.width &&
@@ -1093,7 +1176,11 @@
       var level = currentLevel();
       var card = level.card || {};
       if (ui.cardImage) {
-        ui.cardImage.src = card.src || "";
+        var cardSrc = card.src || "";
+        if (cardSrc && ui.cardImage.getAttribute("data-loaded") !== cardSrc) {
+          ui.cardImage.src = cardSrc;
+          ui.cardImage.setAttribute("data-loaded", cardSrc);
+        }
         ui.cardImage.alt = card.alt || "Поздравительная открытка от Тото";
         ui.cardImage.style.objectPosition = card.position || "50% 50%";
       }
@@ -1124,6 +1211,10 @@
     function openFinal() {
       refreshJourney(false);
       if (!journey.allCompleted && !preview) return false;
+      if (ui.finalImage && ui.finalImage.getAttribute("data-loaded") !== "assets/cards/final.webp") {
+        ui.finalImage.src = "assets/cards/final.webp";
+        ui.finalImage.setAttribute("data-loaded", "assets/cards/final.webp");
+      }
       exitFullscreenView(function () {
         dialogs.forEach(closeDialog);
         progress.markFinalSeen();
@@ -1142,7 +1233,7 @@
       closeDialog(ui.victoryDialog);
       state.previewCard = false;
       if (index !== -1) loadLevel(index, true);
-      else showJourney();
+      else goToLanding();
     }
 
     function win() {
@@ -1260,10 +1351,7 @@
         startGame(false);
         return;
       }
-      if (!state.started && ui.welcomeDialog && !dialogIsOpen(ui.welcomeDialog) && !dialogIsOpen(ui.finalDialog)) {
-        showDialog(ui.welcomeDialog, ui.startButton);
-      }
-      if (dialogIsOpen(ui.welcomeDialog) && document.activeElement === ui.welcomeDialog) {
+      if (!state.started && ui.startButton && document.activeElement === document.body) {
         focusSafely(ui.startButton);
       }
     }
@@ -1288,13 +1376,6 @@
           "Картинка не открылась. Распакуй весь архив целиком, сохрани папку assets рядом с index.html и нажми «Попробовать ещё раз».";
       }
       // The error and its retry button must be reachable, even before the first game.
-      if (dialogIsOpen(ui.welcomeDialog) && ui.retryImageButton &&
-          !ui.welcomeDialog.contains(ui.retryImageButton)) {
-        closeDialog(ui.welcomeDialog);
-        root.requestAnimationFrame(function () {
-          if (state.error) focusSafely(ui.retryImageButton);
-        });
-      }
       updateButtons();
       syncClock();
       announce("Картинка пока недоступна. Проверь, что архив полностью распакован.");
@@ -1322,16 +1403,15 @@
     listen(ui.sceneImage, "error", markImageError);
     listen(ui.retryImageButton, "click", retryImage);
     listen(ui.startButton, "click", continueJourney);
-    if (preview && brandLink) brandLink.setAttribute("href", "./index.html?preview=1");
+    if (preview && brandLink) brandLink.setAttribute("href", "./index.html?preview=1#welcomeDialog");
     listen(brandLink, "click", function (event) {
       if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button > 0) return;
       event.preventDefault();
-      showJourney();
+      goToLanding();
     });
     listen(ui.restartButton, "click", function () { startGame(true); });
     listen(ui.replayButton, "click", function () { startGame(true); });
-    listen(ui.journeyButton, "click", showJourney);
-    listen(ui.journeyClose, "click", function () { if (state.started) closeDialog(ui.welcomeDialog); });
+    listen(ui.journeyButton, "click", goToLanding);
     listen(ui.helpButton, "click", function () {
       exitFullscreenView(function () { showDialog(ui.helpDialog, ui.helpClose); });
     });
@@ -1345,7 +1425,7 @@
     listen(ui.finalButton, "click", openFinal);
     listen(ui.hubFinalButton, "click", openFinal);
     listen(ui.finalClose, "click", function () { closeDialog(ui.finalDialog); });
-    listen(ui.finalReplayButton, "click", function () { closeDialog(ui.finalDialog); showJourney(); });
+    listen(ui.finalReplayButton, "click", function () { closeDialog(ui.finalDialog); goToLanding(); });
     listen(ui.previewCardButton, "click", function () {
       if (!preview || !state.ready) return;
       if (!state.started) startGame(false);
@@ -1583,7 +1663,8 @@
           preview: preview,
           fullscreen: fullscreenActive(),
           immersiveFallback: state.immersive,
-          finalOpen: dialogIsOpen(ui.finalDialog)
+          finalOpen: dialogIsOpen(ui.finalDialog),
+          landingVisible: landingIsVisible()
         };
       }
     });
@@ -1606,11 +1687,8 @@
     updateClock();
     updateButtons();
     resizeScene();
-    // showModal, rather than an HTML open attribute, activates native modal focus.
-    if (ui.welcomeDialog) {
-      if (ui.welcomeDialog.open) ui.welcomeDialog.removeAttribute("open");
-      showDialog(ui.welcomeDialog, ui.startButton);
-    }
+    document.body.classList.remove("game-active", "route-panel-open");
+    if (ui.startButton) focusSafely(ui.startButton);
     var firstIndex = nextIncomplete(-1);
     loadLevel(firstIndex === -1 ? 0 : firstIndex, false);
     if (preview && parameters.get("final") === "1") openFinal();
