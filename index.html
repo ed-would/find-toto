@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f1e7">
+  <meta name="description" content="13 маленьких путешествий и один очень любимый мопс. Праздничная игра «Найди Тото» для Рины.">
+  <title>Найди Тото — 13 чудес для Рины ♡</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preload" href="assets/scenes/scene-01.webp" as="image" fetchpriority="high">
+  <script src="config.js" defer></script>
+  <script src="progress.js" defer></script>
+  <script src="game.js" defer></script>
+</head>
+<body>
+  <svg class="icon-defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <symbol id="i-paw" viewBox="0 0 24 24"><path d="M12 11c-2.5 0-3.1 2-5.3 4.1C3.5 18.3 5.6 22 9 20.7c2-.8 4-.8 6 0 3.4 1.3 5.5-2.4 2.3-5.6C15.1 13 14.5 11 12 11Z" fill="currentColor"/><ellipse cx="4.2" cy="10" rx="2.4" ry="3.2" transform="rotate(-25 4.2 10)" fill="currentColor"/><ellipse cx="9" cy="5" rx="2.5" ry="3.3" transform="rotate(-10 9 5)" fill="currentColor"/><ellipse cx="15" cy="5" rx="2.5" ry="3.3" transform="rotate(10 15 5)" fill="currentColor"/><ellipse cx="19.8" cy="10" rx="2.4" ry="3.2" transform="rotate(25 19.8 10)" fill="currentColor"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+      <symbol id="i-fit" viewBox="0 0 24 24"><path d="M8 4H4v4m12-4h4v4M4 16v4h4m8 0h4v-4"/><rect x="8" y="8" width="8" height="8" rx="1"/></symbol>
+      <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 2.8 7.2L22 12l-7.2 2.8L12 22l-2.8-7.2L2 12l7.2-2.8Z"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+      <symbol id="i-sound" viewBox="0 0 24 24"><path d="m11 5-5 4H3v6h3l5 4ZM15 9c2 1.5 2 4.5 0 6m3-9c4 3 4 9 0 12"/></symbol>
+      <symbol id="i-question" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.2 8.5c.5-3 6-3 5.8.3-.1 2-3 2-3 4.2m0 3v.5"/></symbol>
+      <symbol id="i-expand" viewBox="0 0 24 24"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m6 0h5v-5"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20 5c-2-2-6-2-8 2-2-4-6-4-8-2-4 4 0 9 8 15C20 14 24 9 20 5Z"/></symbol>
+      <symbol id="i-restart" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/></symbol>
+      <symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 12V5a2 2 0 0 1 4 0v6-8a2 2 0 0 1 4 0v8-5a2 2 0 0 1 4 0v8c0 5-3 8-7 8-3 0-5-2-7-5l-3-4c-2-3 1-5 3-2l2 2Z"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="app-shell">
+    <header class="masthead">
+      <a class="brand" href="./index.html" aria-label="Найди Тото, главная"><span class="brand-mark"><svg class="icon"><use href="#i-paw"/></svg></span><span>маленькие <i>чудеса</i></span></a>
+      <span class="occasion"><span class="occasion-dot"></span> 24 октября <span class="occasion-divider">/</span> С днём рождения, Рина!</span>
+      <div class="header-actions">
+        <button id="journeyButton" class="button journey-button" type="button"><svg class="icon"><use href="#i-paw"/></svg><span>Наш маршрут</span></button>
+        <button id="soundButton" class="icon-button sound-button" type="button" aria-label="Включить звуки" aria-pressed="false" title="Звуки выключены"><svg class="icon"><use href="#i-sound"/></svg><span class="sound-slash" aria-hidden="true"></span></button>
+        <button id="helpButton" class="icon-button" type="button" aria-label="Как играть" title="Как играть"><svg class="icon"><use href="#i-question"/></svg></button>
+      </div>
+    </header>
+
+    <div id="previewBadge" class="preview-badge" hidden>Просмотр подарка · все остановки открыты · обычный прогресс не меняется <button id="previewCardButton" class="text-button" type="button" hidden>Проверить открытку этого уровня</button></div>
+    <p id="saveNotice" class="save-notice" role="status" hidden>Браузер не разрешил сохранить путешествие. Пока эта вкладка открыта, игра работает; после закрытия прогресс может потеряться.</p>
+
+    <main class="game-layout">
+      <aside class="story-panel" aria-label="Задание и подсказки">
+        <div class="story-heading">
+          <p class="eyebrow">Для моей любимой Рины</p>
+          <h1>Найди<br><em>Тото</em><span class="title-sparkle" aria-hidden="true">✦</span></h1>
+          <p class="story-description">Тринадцать маленьких путешествий.<br>Один очень любимый мопс.<br>И целый день сюрпризов.</p>
+        </div>
+        <div class="wanted-card">
+          <div class="toto-portrait" aria-hidden="true"><img src="assets/portrait.webp" alt="" width="320" height="320" draggable="false"></div>
+          <div class="wanted-copy"><span class="tiny-label">Ищем вот этого хитрюгу</span><h2>Тото <span aria-hidden="true">♡</span></h2><p>Седая мордочка, тёмные ушки<br>и талант прятаться на виду.</p></div><span class="portrait-star" aria-hidden="true">✧</span>
+        </div>
+        <div class="mission-note"><span id="levelNumber" class="note-number">01</span><div><p id="levelTitle" class="mission-title">Городок маленьких чудес</p><p id="levelSubtitle" class="mission-subtitle">Осень · начало путешествия</p><p id="levelDescription">Приближай картинку, заглядывай в уголки и нажми на Тото, когда найдёшь.</p></div></div>
+        <section class="hint-section" aria-labelledby="hintTitle">
+          <div class="section-label"><h2 id="hintTitle">Немного волшебства</h2><span id="hintCount" class="hint-count">0 / 3</span></div>
+          <p id="hintMessage" class="hint-message">Если Тото слишком хорошо спрятался, звёздочка тебе поможет.</p>
+          <button id="hintButton" class="button button-hint" type="button"><svg class="icon"><use href="#i-star"/></svg><span>Попросить подсказку</span></button>
+          <button id="openCardButton" class="button button-primary" type="button" hidden>Открыть поздравление <svg class="icon"><use href="#i-heart"/></svg></button>
+        </section>
+        <div class="journey-mini"><span id="progressLabel">Открыток найдено: 0 из 13</span><p id="journeyCountdown">Следующий сюрприз уже в пути…</p></div>
+        <div class="sidebar-signature"><span class="signature-line"></span><p>С любовью, твой Мишук<span>и один пушистый сообщник</span></p><svg class="icon"><use href="#i-heart"/></svg></div>
+      </aside>
+
+      <section class="world-section" aria-labelledby="worldTitle">
+        <div class="world-caption"><div><span class="caption-star" aria-hidden="true">✦</span><h2 id="worldTitle">Городок маленьких чудес</h2></div><span class="chapter-label">мопсовые прятки</span></div>
+        <div id="sceneShell" class="scene-shell">
+          <div id="viewport" class="viewport" tabindex="0" role="region" aria-label="Игровая картинка. Найди Тото. Масштаб: плюс и минус, перемещение: стрелки, проверить центр: пробел или Enter." aria-describedby="mapInstructions">
+            <div id="world" class="world">
+              <img id="sceneImage" class="scene-image" src="assets/scenes/scene-01.webp" alt="Подробная иллюстрация уютного осеннего городка: канал, мостики, книжные и цветочные лавки, трамвайчик и жители со своими маленькими историями. Где-то прячется Тото." draggable="false" fetchpriority="high">
+              <div id="hintArea" class="hint-area" hidden aria-hidden="true"></div>
+              <div id="hintPin" class="hint-pin" hidden aria-hidden="true"><span>Тото ♡</span></div>
+            </div>
+            <span id="keyboardCursor" class="keyboard-cursor" hidden aria-hidden="true"></span>
+          </div>
+          <div class="map-badge"><span class="status-dot"></span><span>Тото где-то здесь</span></div>
+          <div class="map-top-actions">
+            <button id="mapHintButton" class="icon-button glass-button map-hint-button" type="button" aria-label="Попросить подсказку" title="Подсказка"><svg class="icon"><use href="#i-star"/></svg></button>
+            <button id="fullscreenButton" class="icon-button glass-button" type="button" aria-label="Развернуть только картинку на весь экран" title="Картинка на весь экран"><svg class="icon"><use href="#i-expand"/></svg></button>
+          </div>
+          <p id="mapHintMessage" class="map-hint-message" hidden></p>
+          <div id="loadingState" class="loading-state" role="status"><span class="loading-paw"><svg class="icon"><use href="#i-paw"/></svg></span><strong>Открываем новое местечко…</strong><span>Тото уже нашёл укромный уголок</span></div>
+          <div id="loadError" class="load-error" role="alert" hidden><svg class="icon"><use href="#i-question"/></svg><h3>Картинка пока не открылась</h3><p>Проверь соединение и попробуй ещё раз. Если игра открыта из архива, сначала распакуй его целиком.</p><button id="retryImageButton" type="button" class="button button-primary">Попробовать снова</button></div>
+          <div class="map-controls" aria-label="Управление масштабом">
+            <button id="zoomOut" type="button" class="map-control" aria-label="Уменьшить" title="Уменьшить (−)"><svg class="icon"><use href="#i-minus"/></svg></button>
+            <output id="zoomLabel" class="zoom-label" aria-label="Масштаб">100%</output>
+            <button id="zoomIn" type="button" class="map-control" aria-label="Приблизить" title="Приблизить (+)"><svg class="icon"><use href="#i-plus"/></svg></button>
+            <span class="control-divider"></span>
+            <button id="fitButton" type="button" class="map-control" aria-label="Показать всю картинку" title="Вся картинка (0)"><svg class="icon"><use href="#i-fit"/></svg></button>
+          </div>
+          <div class="time-badge" aria-label="Время поисков"><svg class="icon"><use href="#i-clock"/></svg><span id="timeLabel">00:00</span></div>
+        </div>
+        <div class="map-footer"><p id="mapInstructions"><svg class="icon"><use href="#i-hand"/></svg><span class="desktop-instructions">Тяни, чтобы гулять · колёсико — приблизить · нажми на Тото</span><span class="touch-instructions">Перемещай пальцем · приближай двумя · нажми на Тото</span></p><button id="restartButton" class="text-button" type="button"><svg class="icon"><use href="#i-restart"/></svg><span>Искать снова</span></button></div>
+      </section>
+    </main>
+    <footer class="page-footer"><span>Сделано из любви и немножко мопсовой магии</span><span class="secret-number" title="Наш маленький символ">13<span>♡</span>23</span><span>Никуда не спешим. Это твой день.</span></footer>
+  </div>
+
+  <dialog id="welcomeDialog" class="dialog welcome-dialog journey-dialog" aria-labelledby="welcomeTitle" aria-describedby="welcomeDescription">
+    <button id="journeyClose" class="icon-button dialog-close" type="button" aria-label="Вернуться к поискам" hidden><svg class="icon"><use href="#i-close"/></svg></button>
+    <div class="journey-hero">
+      <div class="journey-intro">
+        <p class="eyebrow">24 октября · с любовью для Рины</p>
+        <h2 id="welcomeTitle">Один мопс.<br>Тринадцать <em>чудес.</em></h2>
+        <p id="welcomeDescription">Рина, Тото приготовил тебе целый день маленьких путешествий. В каждом новом месте он прячется, а когда ты его находишь — дарит открытку.</p>
+        <p class="journey-rules">Первая остановка уже открыта. Следующие появляются <strong>каждые 30 минут</strong>. Можно уйти по своим делам, вернуться позже и пройти все открывшиеся места подряд.</p>
+        <button id="startButton" type="button" class="button button-primary welcome-start" autofocus>Иду искать! <svg class="icon"><use href="#i-arrow"/></svg></button>
+        <p class="welcome-footnote">Уютной прогулки, Любимочка ♡ ♡ ♡</p>
+      </div>
+      <div class="journey-illustration"><img src="assets/intro.webp" alt="Тото в цветочной корзине воздушного шара везёт Рине письмо с сердечком." width="900" height="600"><span class="journey-art-stamp">особенная доставка<br><svg class="icon"><use href="#i-paw"/></svg><br>от Тото</span></div>
+    </div>
+    <section class="journey-schedule" aria-label="Расписание путешествия">
+      <div class="next-surprise"><svg class="icon"><use href="#i-clock"/></svg><div><p id="welcomeCountdownLabel">До следующей остановки</p><strong id="welcomeCountdown">30:00</strong></div></div>
+      <div class="journey-progress"><strong id="welcomeProgress">0 из 13 открыток</strong><p>Каждая находка — ещё один привет от Тото</p></div>
+      <div class="journey-times"><span>Начали: <b id="journeyStartTime">сегодня</b></span><span>Все места откроются: <b id="journeyEndTime">через 6 часов</b></span></div>
+    </section>
+    <section class="journey-route" aria-labelledby="routeTitle">
+      <div class="route-heading"><div><p class="eyebrow">Наш маршрут</p><h3 id="routeTitle">Куда спрятался Тото?</h3></div><span>Открытые места можно проходить в любом порядке</span></div>
+      <div id="levelGrid" class="level-grid"></div>
+      <button id="hubFinalButton" class="button button-primary hub-final-button" type="button" hidden>Открыть главное письмо <svg class="icon"><use href="#i-heart"/></svg></button>
+      <p class="journey-bottom-note">Отсчёт идёт с первого визита в этом браузере и продолжается, даже если закрыть вкладку. Найденные открытки сохраняются. После открытия всех мест путешествие остаётся с тобой ♡</p>
+    </section>
+  </dialog>
+
+  <dialog id="helpDialog" class="dialog help-dialog" aria-labelledby="helpTitle">
+    <button id="helpClose" class="icon-button dialog-close" type="button" aria-label="Закрыть правила"><svg class="icon"><use href="#i-close"/></svg></button>
+    <p class="eyebrow">Маленькая инструкция</p><h2 id="helpTitle">Как найти <em>Тото?</em></h2>
+    <ol class="help-list">
+      <li><strong>Загляни в маленький мир.</strong><p>На каждой картинке Тото один. Он может быть в одежде, выглядывать из окна или прятаться за вещами. Узнавай его по знакомой мордочке.</p></li>
+      <li><strong>Подойди поближе.</strong><p>Колёсико и кнопки + / − приближают картинку. На телефоне раздвигай два пальца. Перетаскивай изображение. Кнопка в верхнем углу разворачивает только картинку.</p></li>
+      <li><strong>Нажми на Тото.</strong><p>Тебя ждут хлопушки и новая открытка. Ошибаться можно сколько угодно. В конце всех тринадцати поисков откроется главное письмо.</p></li>
+      <li><strong>Попроси намёк.</strong><p>Первая и вторая подсказки — только словами. Третья отметит большой участок картинки. Точное место Тото всё равно нужно найти самой.</p></li>
+      <li><strong>Возвращайся за сюрпризами.</strong><p>Новая остановка открывается каждые 30 минут с первого визита. Можно пропускать места, проходить позже и повторять. Последняя откроется через 6 часов. Меню «Наш маршрут» всегда рядом.</p></li>
+    </ol>
+    <div class="keyboard-note"><strong>С клавиатуры</strong><p><kbd>Tab</kbd> — между кнопками. На картинке: <kbd>←</kbd> <kbd>↑</kbd> <kbd>↓</kbd> <kbd>→</kbd> — перемещение, <kbd>+</kbd> <kbd>−</kbd> — масштаб, <kbd>0</kbd> — вся картинка. Наведи центральный прицел на Тото и нажми <kbd>Enter</kbd> или <kbd>Пробел</kbd>. <kbd>Esc</kbd> — закрыть окно или полноэкранную картинку.</p></div>
+    <p class="help-bottom">Здесь нет проигрыша. Есть только маленькое приключение.</p>
+  </dialog>
+
+  <dialog id="victoryDialog" class="victory-dialog chapter-dialog" aria-labelledby="victoryTitle" aria-describedby="cardText">
+    <button id="victoryClose" class="icon-button victory-close" type="button" aria-label="Вернуться к картинке"><svg class="icon"><use href="#i-close"/></svg></button>
+    <div class="birthday-card">
+      <div class="birthday-art"><img id="cardImage" src="assets/cards/card-01.webp" alt="Тото приготовил открытку." loading="lazy"><span class="birthday-stamp"><span>особенная доставка</span><svg class="icon"><use href="#i-paw"/></svg><span>от всего сердца</span></span></div>
+      <section class="birthday-letter">
+        <p id="victoryTitle" class="victory-eyebrow"><svg class="icon"><use href="#i-star"/></svg> Рина, ты нашла Тото!</p>
+        <p id="cardLocation" class="birthday-date">Письмо 01 из 13</p>
+        <h2 id="cardTitle">Полетели за <em>чудесами?</em></h2>
+        <div class="letter-ornament" aria-hidden="true"><span></span>♡<span></span></div>
+        <p id="cardText" class="birthday-message chapter-message"></p>
+        <p id="cardSignoff" class="letter-signature">Твой Тото ♡</p>
+        <p id="cardProgress" class="card-progress">Ещё одна открытка в твоей коллекции</p>
+        <div class="chapter-actions">
+          <button id="nextLevelButton" type="button" class="button button-primary">Дальше по маршруту <svg class="icon"><use href="#i-arrow"/></svg></button>
+          <button id="finalButton" type="button" class="button button-primary" hidden>Главное письмо для тебя <svg class="icon"><use href="#i-heart"/></svg></button>
+          <button id="replayButton" type="button" class="button button-replay">Найти Тото ещё раз <svg class="icon"><use href="#i-restart"/></svg></button>
+        </div>
+        <p class="victory-stats">Поиски <span id="victoryTime">00:00</span><span aria-hidden="true"> · </span><span id="victoryHints">Без подсказок</span></p>
+      </section>
+    </div>
+  </dialog>
+
+  <dialog id="finalDialog" class="victory-dialog final-dialog" aria-labelledby="finalTitle" aria-describedby="birthdayMessage">
+    <button id="finalClose" class="icon-button victory-close" type="button" aria-label="Закрыть главное письмо"><svg class="icon"><use href="#i-close"/></svg></button>
+    <div class="birthday-card">
+      <div class="birthday-art"><img id="finalImage" src="assets/cards/final.webp" alt="Тото дома, среди открыток из путешествия, протягивает самое важное письмо с сердечком." loading="lazy"><span class="birthday-stamp"><span>тринадцать чудес</span><svg class="icon"><use href="#i-heart"/></svg><span>и одна большая любовь</span></span></div>
+      <section class="birthday-letter final-letter">
+        <p class="victory-eyebrow"><svg class="icon"><use href="#i-star"/></svg> Все 13 заданий Тото выполнены!</p>
+        <p class="birthday-date">24 октября · для тебя, Рина</p>
+        <h2 id="finalTitle">С днём<br>рождения,<br><em>Любимочка.</em></h2>
+        <div class="letter-ornament" aria-hidden="true"><span></span>♡<span></span></div>
+        <div id="birthdayMessage" class="birthday-message">
+          <p>Ну вот, ты нашла нашего хитрюгу во всех тринадцати местах. Он очень старался. Я тоже — мне так хотелось, чтобы сегодня ты побольше улыбалась.</p>
+          <p>Рина, я люблю нашу жизнь вместе. Наши поездки, разговоры обо всём и обычные вечера, когда ты рядом, а Тото где-то уютно сопит. Из всего этого и складывается моё счастье.</p>
+          <p>Я хочу, чтобы у тебя было время на то, что ты любишь: рисовать, придумывать, путешествовать или просто отдыхать, когда хочется. Чтобы получалось то, о чём ты мечтаешь. И чтобы ты всегда знала: я рядом, я за тебя и в тебя верю.</p>
+          <p>Давай ещё много где побываем, много всего попробуем и насобираем своих смешных историй. А потом будем возвращаться домой — к нашим привычкам, объятиям и тёплым лапкам.</p>
+          <p class="love-line">Я тебя очень люблю. С днём рождения ♡</p>
+        </div>
+        <p class="letter-signature">Твой Мишук, каждый день.<span>И Тото, который помогал как мог ♡</span></p>
+        <div class="birthday-bottom"><span class="letter-number">13 <svg class="icon"><use href="#i-heart"/></svg> 23</span><button id="finalReplayButton" type="button" class="button button-replay">Ещё погуляем? <svg class="icon"><use href="#i-arrow"/></svg></button></div>
+      </section>
+    </div>
+  </dialog>
+  <canvas id="confettiCanvas" class="confetti-canvas" aria-hidden="true"></canvas>
+  <p id="liveStatus" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+  <noscript><div class="noscript-note">Для игры нужен JavaScript. Разреши его в браузере и открой страницу заново.</div></noscript>
+</body>
+</html>

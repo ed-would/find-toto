@@ -1,0 +1,55 @@
+name: A little birthday magic
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-and-build:
+    name: Check the little world
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open the gift
+        uses: actions/checkout@v6
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Check assets and game scenarios
+        run: npm run check
+      - name: Assemble the static game
+        run: npm run build
+      - name: Pack the journey
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+  deploy:
+    name: Send Toto to GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: check-and-build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Publish the birthday game
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,17 @@
+{
+  "name": "find-toto-for-rina",
+  "version": "2.0.0",
+  "private": true,
+  "description": "13 мимишных путешествий, один любимый мопс и целый день сюрпризов для Рины.",
+  "scripts": {
+    "start": "node scripts/serve.cjs",
+    "dev": "node scripts/serve.cjs",
+    "test": "node tests/run.cjs",
+    "check": "node scripts/check.cjs && node tests/run.cjs",
+    "build": "node scripts/build.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}
