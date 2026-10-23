@@ -11,7 +11,7 @@
 - `assets/cards/intro.webp`: иллюстрация вступления.
 - `assets/portrait.webp`: портрет Тото для образца.
 - `assets/favicon.svg`: маленькая лапка, нарисованная в SVG.
-- `assets/social-preview.png`: превью для ссылок в мессенджерах (Open Graph / Telegram).
+- `assets/social-preview.jpg`: превью для ссылок в мессенджерах (Open Graph / Telegram).
 - `assets/placeholder-toto.webp`: Тото в пледе на закрытых остановках маршрута.
 
 Все игровые файлы локальны. В проекте нет обращений к генератору, внешним фотобанкам или сервисам изображений во время игры.
