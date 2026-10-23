@@ -18,11 +18,11 @@
       "sha256": "118f5ff64019a224068ebd353e36da73fb036e08124291d1edb7824e900d9542"
     },
     {
-      "path": "assets/cards/card-02.png",
-      "width": 1536,
-      "height": 1024,
-      "bytes": 3327427,
-      "sha256": "db1aaf6dea74adfaedf59d658373f9c1dea088ece5c9e88b5729ef60304e2165"
+      "path": "assets/cards/card-02.webp",
+      "width": 3840,
+      "height": 2560,
+      "bytes": 1132284,
+      "sha256": "d6fa4f5d79b72938853b690f6eff621b36e48cdc9710897be4734823861a6067"
     },
     {
       "path": "assets/cards/card-03.webp",
