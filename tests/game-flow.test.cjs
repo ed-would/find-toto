@@ -465,6 +465,8 @@ test('Большое поздравление следует за последн
   assert.equal(h.getState().allCompleted, true);
   h.click('finalButton');
   assert.equal(h.getState().finalOpen, true);
+  assert.match(h.document.getElementById('finalImage').src, /assets\/cards\/final\.webp$/);
+  assert.equal(h.document.getElementById('finalImage').getAttribute('data-loaded'), 'assets/cards/final.webp');
   assert.equal(h.document.getElementById('victoryDialog').open, false);
   h.click('finalReplayButton');
   assert.equal(h.getState().landingVisible, true);

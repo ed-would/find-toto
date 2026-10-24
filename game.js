@@ -99,8 +99,9 @@
       "journeyCountdown", "progressLabel", "levelTitle", "levelSubtitle", "levelNumber",
       "levelDescription", "worldTitle", "mapHintButton", "mapHintMessage", "keyboardCursor",
       "cardImage", "cardTitle", "cardText", "cardLocation", "cardSignoff", "cardProgress",
-      "nextLevelButton", "finalButton", "hubFinalButton", "finalDialog", "finalClose",
-      "finalReplayButton", "previewBadge", "previewCardButton", "saveNotice", "victoryTitle"
+      "nextLevelButton", "finalButton", "hubFinalButton", "finalDialog", "finalImage",
+      "finalClose", "finalReplayButton", "previewBadge", "previewCardButton", "saveNotice",
+      "victoryTitle"
     ].forEach(function (id) { ui[id] = byId(id); });
     if (!ui.viewport || !ui.world || !ui.sceneImage) return;
 
@@ -1208,13 +1209,23 @@
       }
     }
 
+    var finalImageSource = "assets/cards/final.webp";
+
+    function ensureFinalImage() {
+      if (!ui.finalImage) return;
+      if (ui.finalImage.getAttribute("data-loaded") === finalImageSource) return;
+      try {
+        ui.finalImage.src = new URL(finalImageSource, document.baseURI).href;
+      } catch (_) {
+        ui.finalImage.src = finalImageSource;
+      }
+      ui.finalImage.setAttribute("data-loaded", finalImageSource);
+    }
+
     function openFinal() {
       refreshJourney(false);
       if (!journey.allCompleted && !preview) return false;
-      if (ui.finalImage && ui.finalImage.getAttribute("data-loaded") !== "assets/cards/final.webp") {
-        ui.finalImage.src = "assets/cards/final.webp";
-        ui.finalImage.setAttribute("data-loaded", "assets/cards/final.webp");
-      }
+      ensureFinalImage();
       exitFullscreenView(function () {
         dialogs.forEach(closeDialog);
         progress.markFinalSeen();
